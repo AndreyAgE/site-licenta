@@ -1,0 +1,114 @@
+﻿*{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    text-decoration: none;
+    list-style: none;
+}
+.login-container{
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-image: linear-gradient(#062C2B, #020c1f);
+    color: white;
+}
+.log{
+    background: rgba(255, 255, 255, 0.03);
+    backdrop-filter: blur(15px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+    padding: 40px;
+    width: 400px;
+}
+.form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    width: 100%;
+}
+.form a {
+   color: #ffffff;
+    text-decoration: none;
+    font-weight: bold;
+    opacity: 0.8;
+    transition: 0.2s ease;
+}
+.form a:hover {
+    opacity: 1;
+    text-decoration: underline;
+}
+.form-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    font-size: 0.9rem;
+}
+.log-title{
+   text-align: center;
+}
+.input-container{
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    align-items: center;
+    justify-content: center;
+}
+input[type="email"], 
+input[type="password"] {
+    width: 100%;
+    height: 2.5rem;
+    border-radius: 10px;
+    border: none;
+    outline: none;
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    padding: 0 15px;
+}
+.social-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+}
+.social-btn {
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    border: none;
+    cursor: pointer;
+    font-size: 1.2rem;
+    color: white;
+    transition: transform 0.3s ease;
+}
+.social-btn:hover {
+    transform: scale(1.1);
+}
+.google { background-color: #DB4437; }
+.facebook { background-color: #1877F2; }
+.instagram { background: linear-gradient(45deg, #f09433 0%, #dc2743 50%, #bc1888 100%); }
+.form span{
+    text-align: center;
+}
+.btn {
+    padding: 12px;
+    border-radius: 10px;
+    border: none;
+    background-color: #4cd137;
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+    font-size: 1rem;
+}
+.btn:hover {
+    opacity: 0.8;
+    transform: translateY(-2px);
+}
+.social-text {
+    text-align: center;
+    color: #bbb;
+    font-size: 1.2rem;
+    margin-bottom: -10px;
+}

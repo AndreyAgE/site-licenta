@@ -1,0 +1,220 @@
+﻿.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.85);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 2000;
+    backdrop-filter: blur(5px);
+}
+.modal-overlay.hidden {
+    display: none;
+}
+.view-post-content {
+    background-color: #020c1f;
+    width: 90%;
+    max-width: 1000px;
+    height: 85vh;
+    border-radius: 15px;
+    position: relative;
+    display: flex;
+    overflow: hidden;
+    border: 1px solid rgba(255,255,255,0.1);
+}
+.close-btn {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    background: transparent;
+    color: white;
+    border: none;
+    font-size: 2rem;
+    cursor: pointer;
+    z-index: 10;
+    line-height: 1;
+}
+.post-split-layout {
+    display: flex;
+    width: 100%;
+    height: 100%;
+}
+.post-media {
+    flex: 1.5;
+    background: #000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.post-media img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+.post-info-sidebar {
+    flex: 1;
+    background: #0b1426;
+    display: flex;
+    flex-direction: column;
+}
+.post-header {
+    padding: 15px 50px 15px 15px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+.avatar-small { 
+    width: 45px; 
+    height: 45px; 
+    border-radius: 50%; 
+    object-fit: cover; 
+}
+.avatar-micro { 
+    width: 30px;
+    height: 30px; 
+    border-radius: 50%;
+    object-fit: cover; 
+}
+.post-user-details { 
+    display: flex; 
+    flex-direction: column; 
+}
+.post-location { 
+    font-size: 0.85rem;
+    color: #4cd137; 
+}
+.post-comments-section {
+    flex: 1;
+    padding: 15px;
+    overflow-y: auto;
+}
+.comment {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 15px;
+    font-size: 0.9rem;
+    align-items: flex-start;
+}
+.comment-content {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+.comment-content p {
+    margin: 0;
+    color: #ddd;
+    line-height: 1.4;
+}
+.comment-actions {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    font-size: 0.75rem;
+    color: #888;
+    font-weight: bold;
+}
+.comment-btn-small {
+    background: transparent;
+    border: none;
+    color: #888;
+    cursor: pointer;
+    font-weight: bold;
+    padding: 0;
+    transition: color 0.2s;
+}
+.comment-btn-small:hover {
+    color: #fff;
+}
+.comment-btn-small .fa-heart:hover {
+    color: #ff4757;
+}
+.comment.reply {
+    margin-left: 45px;
+    margin-top: -5px;
+}
+.reply-avatar {
+    width: 25px;
+    height: 25px;
+}
+.post-footer {
+    padding: 15px;
+    border-top: 1px solid rgba(255,255,255,0.1);
+}
+.post-actions {
+    margin-bottom: 15px;
+    display: flex; 
+    gap: 15px;
+    font-weight: bold;
+}
+.action-btn { 
+    cursor: pointer;
+    transition: 0.2s;
+}
+.action-btn:hover { 
+    color: #4cd137; 
+}
+.add-comment-box { 
+    display: flex; 
+    gap: 10px; 
+}
+.comment-input {
+    flex: 1;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1);
+    color: white;
+    padding: 10px; 
+    border-radius: 20px; 
+    outline: none;
+}
+.post-comment-btn {
+    background: transparent;
+    border: none;
+    color: #4cd137; 
+    font-weight: bold; 
+    cursor: pointer;
+}
+.carousel-btn {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(0, 0, 0, 0.5);
+    color: white;
+    border: none;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 1.2rem;
+    z-index: 10;
+    transition: 0.3s;
+}
+.carousel-btn:hover {
+    background: rgba(0, 0, 0, 0.8);
+}
+
+.prev-btn { left: 15px; }
+.next-btn { right: 15px; }
+.carousel-dots {
+    position: absolute;
+    bottom: 15px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 8px;
+    z-index: 10;
+}
+.dot {
+    width: 8px;
+    height: 8px;
+    background: rgba(255, 255, 255, 0.5);
+    border-radius: 50%;
+    transition: 0.3s;
+}
+.dot.active {
+    background: white;
+    transform: scale(1.2);
+}

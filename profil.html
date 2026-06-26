@@ -1,0 +1,289 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profil - Trip It</title>
+    <link rel="stylesheet" href="index.css">
+    <link rel="stylesheet" href="profil.css"> 
+    <link rel="stylesheet" href="full-post.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="ui.js" defer></script>
+    <script src="map.js" defer></script>
+    <script src="feed.js" defer></script>
+    <script src="profil.js" defer></script>
+</head>
+<body>
+    <header class="main-header">
+        <div class="left-header">
+            <div class="name"><h1><a href="index.html">Trip It</a></h1></div>
+            <form class="search-bar">
+                <input type="text" placeholder="Cauta">
+            </form>
+        </div>
+        <div class="center-header">
+            <nav class="main-nav">
+                <ul>
+                    <li><a href="index.html">Acasa</a></li>
+                    <li><a href="#">Harta</a></li>
+                    <li><a href="#" id="btn-postare">Posteaza</a></li>
+                </ul>
+            </nav>
+        </div>
+        <div class="right-header">
+            <div class="nav-item dropdown-container">
+                <button class="icon-btn" id="btn-notifications">
+                    <i class="fa-solid fa-bell"></i>
+                    <span class="badge">3</span>
+                </button>
+                <div class="dropdown-menu notifications-menu hidden" id="dropdown-notifications">
+                    <h4>Notificări Noi</h4>
+                    <div class="notification-item">
+                        <div class="av-wrap av-xs"><i class="fa-solid fa-user"></i></div>
+                        <p><strong>Mihai</strong> ți-a apreciat postarea.</p>
+                    </div>
+                    <div class="notification-item">
+                        <div class="av-wrap av-xs"><i class="fa-solid fa-user"></i></div>
+                        <p><strong>Elena</strong> a adăugat un comentariu.</p>
+                    </div>
+                    <div class="notification-item highlight">
+                        <span class="gem-icon">💎</span>
+                        <p>Ai primit 50 Gems la ultima postare!</p>
+                    </div>
+                </div>
+            </div>
+            <div class="nav-item dropdown-container">
+                <div class="profile-trigger" id="btn-profile">
+                    <div class="av-wrap"><i class="fa-solid fa-user"></i><img src="" class="avatar av-hidden" alt="Poza Profil"></div>
+                    <span class="username">Andrei</span>
+                    <i class="fa-solid fa-chevron-down arrow-down"></i>
+                </div>
+                <div class="dropdown-menu profile-menu hidden" id="dropdown-profile">
+                    <a href="profil.html" class="dropdown-link"><i class="fa-regular fa-user"></i> Profilul meu</a>
+                    <a href="#" class="dropdown-link"><i class="fa-solid fa-gear"></i> Setări cont</a>
+                    <a href="#" class="dropdown-link"><i class="fa-solid fa-map-location-dot"></i> Traseele mele</a>
+                    <div class="dropdown-gems-counter" id="dropdown-gems-counter">
+                        <span class="gems-counter-label"><i class="fa-solid fa-gem"></i> Gems luna aceasta</span>
+                        <div class="gems-counter-bar">
+                            <div class="gems-counter-fill" id="gems-bar-fill"></div>
+                        </div>
+                        <span class="gems-counter-value"><span id="gems-remaining">100</span> / 100 rămase</span>
+                    </div>
+                    <hr>
+                    <a href="#" class="dropdown-link logout"><i class="fa-solid fa-right-from-bracket"></i> Deconectare</a>
+                </div>
+            </div>
+        </div>
+    </header>
+    <div class="main-container">
+        <div class="profile-header">
+            <div class="cover">
+                <img src="poze/pozacoperta.png" alt="Coperta Profil" class="cover-img" id="cover-img">
+                <button class="change-cover-btn"><i class="fa-solid fa-camera"></i> Editeaza coperta</button>
+                <input type="file" id="cover-input" accept="image/*" style="display:none">
+            </div>
+            <div class="profile-description">
+                <div class="profile-main-info">
+                    <div class="avatar-wrapper" style="position:relative;display:inline-block;">
+                        <div class="av-wrap av-lg"><i class="fa-solid fa-user"></i><img src="" class="avatar-large av-hidden" id="avatar-img" alt="Poza Profil"></div>
+                        <button class="change-avatar-btn" id="change-avatar-btn" title="Schimbă poza de profil"><i class="fa-solid fa-camera"></i></button>
+                        <input type="file" id="avatar-input" accept="image/*" style="display:none">
+                    </div>
+                    <span class="username-large" id="profile-username">Andrei Popescu</span>
+                    <button id="profile-follow-btn" class="follow-btn" style="display:none;">Urmărire</button>
+                </div>
+                <div class="profile-info">
+                    <div class="reputation-badge">
+                        <span class="rank-title" id="rank-title">🌱 Începător</span>
+                        <span class="rank-gems" id="rank-gems-count">💎 0 RankGems</span>
+                    </div>
+                    <div class="follow">
+                        <div class="following"><strong id="following-count">600</strong> urmariri</div>
+                        <div class="followed"><strong id="followers-count">700</strong> urmaritori</div>
+                    </div>
+                    <div class="description">
+                        <p id="bio-text">21 ani. Pasionat de călătorii. Ne vedem pe traseu! 🌲🏕️</p>
+                        <textarea id="bio-input" class="bio-textarea" style="display:none;" rows="3" placeholder="Descrie-te..."></textarea>
+                        <div id="bio-edit-actions" style="display:none;gap:8px;justify-content:center;" class="bio-edit-actions"><button id="bio-save-btn" class="primary-btn" style="font-size:0.85rem;padding:6px 16px;">Salvează</button><button id="bio-cancel-btn" class="ghost-btn" style="font-size:0.85rem;padding:6px 16px;">Anulează</button></div>
+                        <button class="description-edit-btn">Editeaza descrierea</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="map-section-container">
+            <div class="map-header">
+                <h3>📍 Harta Călătoriilor Mele</h3>
+            </div>
+            <div id="user-personal-map" class="profile-inline-map"></div>
+        </div>
+        <div class="profile-grid">
+            <div class="grid-item">
+                <img src="https://images.unsplash.com/photo-1519681393784-d120267933ba?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80" alt="Postare 1">
+            </div>
+            <div class="grid-item">
+                <img src="https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80" alt="Postare 2">
+            </div>
+            <div class="grid-item">
+                <img src="https://images.unsplash.com/photo-1454496522488-7a8e488e8606?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80" alt="Postare 3">
+            </div>
+            <div class="grid-item">
+                <img src="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80" alt="Postare 4">
+            </div>
+            <div class="grid-item">
+                <img src="https://images.unsplash.com/photo-1472396961693-142e6e269027?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80" alt="Postare 5">
+            </div>
+            <div class="grid-item">
+                <img src="https://images.unsplash.com/photo-1414016642750-7fdd78dc33d9?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80" alt="Postare 6">
+            </div>
+        </div>
+    </div>
+    <div class="modal" id="create-post-modal" hidden>
+    <div class="modal-content modal-wide">
+        <div class="modal-header">
+            <h2>Creeaza postare</h2>
+            <button class="modal-close" data-close="create-post-modal" aria-label="Inchide">&times;</button>
+        </div>
+        <div class="modal-body">
+            <form id="post-form" class="post-form">
+                <div class="form-row">
+                    <input type="text" id="post-title" placeholder="Titlu traseu" required>
+                </div>
+                <div class="form-row">
+                    <textarea id="post-description" placeholder="Descriere..." rows="3"></textarea>
+                </div>
+                <div class="form-row form-row-split">
+                    <select id="post-terrain" required>
+                        <option value="">Tip teren...</option>
+                        <option value="munte">Munte</option>
+                        <option value="deal">Deal</option>
+                        <option value="mare">Mare</option>
+                        <option value="padure">Padure</option>
+                        <option value="oras">Oras</option>
+                    </select>
+                    <select id="post-difficulty" required>
+                        <option value="">Dificultate...</option>
+                        <option value="usor">Usor</option>
+                        <option value="mediu">Mediu</option>
+                        <option value="greu">Greu</option>
+                    </select>
+                </div>
+
+                <div class="map-toolbar">
+                    <div class="map-search-wrap">
+                        <input type="text" id="map-search-input" class="map-search-input" placeholder="Cauta locatie (ex: Castelul Peles)...">
+                        <button type="button" id="map-search-btn" class="map-tool-btn" title="Cauta">
+                            <i class="fa-solid fa-magnifying-glass"></i>
+                        </button>
+                    </div>
+                    <button type="button" id="map-geo-btn" class="map-tool-btn map-geo-btn" title="Locatia mea curenta">
+                        <i class="fa-solid fa-location-crosshairs"></i>
+                    </button>
+                </div>
+                <div class="map-hint">Click pe harta pentru a adauga waypoint-uri. Markerele sunt mutabile. Distanta se calculeaza automat.</div>
+                <div id="map-container" class="map-container"></div>
+
+                <div class="route-stats">
+                    <span>Puncte: <strong id="stat-points">0</strong></span>
+                    <span>Distanta totala: <strong id="stat-distance">0 m</strong></span>
+                    <button type="button" id="undo-waypoint" class="ghost-btn">Sterge ultimul punct</button>
+                    <button type="button" id="clear-route" class="ghost-btn ghost-btn-danger">Sterge traseul</button>
+                </div>
+
+                <ul id="waypoint-list" class="waypoint-list"></ul>
+
+                <div class="form-actions">
+                    <button type="submit" class="primary-btn">Publica postare</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Mini-form pentru metadate waypoint (apare la click pe harta) -->
+<div class="modal modal-small" id="waypoint-modal" hidden>
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>Detalii waypoint</h2>
+            <button class="modal-close" data-close="waypoint-modal" aria-label="Inchide">&times;</button>
+        </div>
+        <div class="modal-body">
+            <form id="waypoint-form" class="post-form">
+                <div class="form-row">
+                    <input type="text" id="wp-name" placeholder="Nume punct (ex: Stanca)" required>
+                </div>
+                <div class="form-row">
+                    <textarea id="wp-description" placeholder="Descriere (optional)" rows="2"></textarea>
+                </div>
+                <div class="form-row">
+                    <label class="file-label">
+                        Poza punct
+                        <input type="file" id="wp-image" accept="image/*">
+                    </label>
+                    <img id="wp-image-preview" class="wp-preview" alt="" hidden>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="ghost-btn" data-close="waypoint-modal">Anuleaza</button>
+                    <button type="submit" class="primary-btn">Salveaza punctul</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+    <!-- Overlay harta traseele urmariților -->
+    <div id="following-map-overlay" class="following-map-overlay hidden">
+        <div class="following-map-content">
+            <div class="following-map-header">
+                <h2>🗺️ Harta — Traseele celor urmăriți</h2>
+                <button id="close-following-map" class="close-btn">&times;</button>
+            </div>
+            <div id="following-map-container" class="following-map-container"></div>
+        </div>
+    </div>
+    <div id="post-modal" class="modal-overlay hidden">
+        <div class="view-post-content">
+            <button id="close-post-btn" class="close-btn" data-close="post-modal">&times;</button>
+            <div class="post-split-layout">
+                <div class="post-left-panel">
+                    <div id="modal-map-wrapper"></div>
+                    <div id="modal-waypoints" class="modal-waypoints"></div>
+                </div>
+                <div class="post-info-sidebar">
+                    <div class="post-header">
+                        <div class="av-wrap av-sm"><i class="fa-solid fa-user"></i><img src="" class="avatar-small av-hidden" id="modal-avatar" alt="Avatar"></div>
+                        <div class="post-user-details">
+                            <strong id="modal-username">Utilizator</strong>
+                            <span class="post-location" id="modal-location">📍 Locație</span>
+                        </div>
+                        <button id="modal-follow-btn" class="follow-btn" style="display:none;">Urmărire</button>
+                    </div>
+                    <p id="modal-description" class="modal-description"></p>
+                    <div class="post-comments-section" id="modal-comments-section"></div>
+                    <div class="post-footer">
+                        <div class="post-actions">
+                            <button class="action-btn" id="modal-like-btn">❤️ 0 Likeuri</button>
+                            <div class="gem-btn-wrapper">
+                                <button class="action-btn" id="modal-gem-btn">💎 Oferă Gem</button>
+                                <div id="gem-picker" class="gem-picker hidden">
+                                    <div class="gem-picker-balance">Disponibil: <strong id="gem-picker-remaining">100</strong> 💎</div>
+                                    <div class="gem-picker-row">
+                                        <button type="button" id="gem-decrement" class="gem-step-btn">−</button>
+                                        <input type="number" id="gem-amount-input" class="gem-amount-input" value="1" min="1" max="100">
+                                        <button type="button" id="gem-increment" class="gem-step-btn">+</button>
+                                        <button type="button" id="gem-confirm-btn" class="gem-confirm-btn">Oferă 💎</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="add-comment-box">
+                            <input type="text" placeholder="Adaugă un comentariu..." class="comment-input">
+                            <button class="post-comment-btn">Publică</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

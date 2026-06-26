@@ -1,0 +1,40 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="login.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="auth.js" defer></script>
+    <title>Trip It</title>
+</head>
+<body>
+    <div class="login-container">
+        <div class="log">
+            <form id="login-form" class="form">
+                <h2 class="log-title">Login</h2>
+                <div class="input-container">
+                    <input type="email" name="email" placeholder="Email" required>
+                    <input type="password" name="parola" placeholder="Introdu parola" minlength="5" maxlength="50" required> 
+                </div>
+                <button class="btn" type="submit">Login</button>
+                <div class="form-actions">
+                        <label class="remember">
+                            <input class="checkbox" type="checkbox"> Ține-mă minte
+                        </label>
+                        <a href="#" class="forgot-link">Ai uitat parola?</a>
+                    </div>
+                <span class="social-text">Conecteaza-te cu</span>
+                 <div class="social-buttons">
+                    <button class="social-btn google"><i class="fa-brands fa-google"></i></button>
+                    <button class="social-btn facebook"><i class="fa-brands fa-facebook-f"></i></button>
+                    <button class="social-btn instagram"><i class="fa-brands fa-instagram"></i></button>
+                </div>
+                <span class="signup-link">Nu ai cont?
+                    <a href="register.html">Register</a>
+                </span>
+            </form>
+        </div>
+    </div>
+</body>
+</html>
