@@ -1,10 +1,10 @@
-var express = require('express');
-var router = express.Router();
-var Notification = require('../models/Notification');
+const express = require('express');
+const router = express.Router();
+const Notification = require('../models/Notification');
 // Aduc notificarile necitite
 router.get('/:userId', async function(req, res) {
     try {
-        var notifs = await Notification.find({ recipient: req.params.userId, read: false })
+        const notifs = await Notification.find({ recipient: req.params.userId, read: false })
             .populate('sender', 'username avatar')
             .populate('post', 'title')
             .sort({ createdAt: -1 })

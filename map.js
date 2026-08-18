@@ -3,12 +3,11 @@
     var postModal = document.getElementById("create-post-modal");
     var waypointModal = document.getElementById("waypoint-modal");
     var waypointForm = document.getElementById("waypoint-form");
-    //variabile globale
     var createMap = null;
     window.waypoints = []; // lista cu toate punctele adaugate
     var routePolyline = null; // linia care uneste punctele
     var pendingWaypoint = null; // punctul pe care urmeaza sa il salvez
-    // Marker temporar pentru geocoding / geolocatie (nu e waypoint, ci doar punct de referinta)
+    // Marker temporar pentru geocoding
     var searchMarker = null;
     function placeSearchMarker(lat, lng, label) {
         if (searchMarker) { createMap.removeLayer(searchMarker); }
@@ -45,7 +44,7 @@
                 alert('Eroare la cautare. Verifica conexiunea.');
             });
     }
-    // Locatia curenta cu HTML5 Geolocation
+    // Locatia curenta cu Geolocation
     function flyToCurrentLocation() {
         var btn = document.getElementById('map-geo-btn');
         if (!navigator.geolocation) {
@@ -89,8 +88,8 @@
             });
             // Bara de cautare geocoding
             var searchInput = document.getElementById('map-search-input');
-            var searchBtn   = document.getElementById('map-search-btn');
-            var geoBtn      = document.getElementById('map-geo-btn');
+            var searchBtn = document.getElementById('map-search-btn');
+            var geoBtn = document.getElementById('map-geo-btn');
             if (searchBtn) {
                 searchBtn.addEventListener('click', function() {
                     var q = searchInput ? searchInput.value.trim() : '';
@@ -155,9 +154,9 @@
             iconAnchor: [15, 15]
         });
     }
-    // Formula Haversine pentru calculul distantei dintre doua puncte GPS
+    // Formula Haversine
     function haversineMeters(lat1, lng1, lat2, lng2) {
-        var R = 6371000; // raza Pamantului in metri
+        var R = 6371000; 
         // Convertesc gradele in radiani
         var lat1Rad = lat1 * Math.PI / 180;
         var lat2Rad = lat2 * Math.PI / 180;
@@ -169,7 +168,7 @@
         var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
         return R * c;
     }
-    // Actualizez statisticile afisate (numar puncte, distanta totala, lista)
+    // statisticile afisate
     function updateRouteStats() {
         var statPoints = document.getElementById("stat-points");
         if (statPoints) {
@@ -256,7 +255,7 @@
                 img: hasImage ? imgPreview : null,
                 marker: marker
             });
-            // Dragend - updatez coordonatele in array si redesenez traseul
+            // Dragend updatez coordonatele in array si redesenez traseul
             (function(idx) {
                 marker.on('dragend', function() {
                     var pos = marker.getLatLng();
@@ -272,7 +271,7 @@
             pendingWaypoint = null;
         });
     }
-    // Buton Undo - sterg ultimul waypoint adaugat
+    // Buton Undo
     var undoBtn = document.getElementById("undo-waypoint");
     if (undoBtn) {
         undoBtn.addEventListener("click", function() {
@@ -284,7 +283,7 @@
             }
         });
     }
-    // Functie care sterge tot traseul (toate punctele + linia)
+    // Functie care sterge tot traseul
     window.clearRouteData = function() {
         for (var i = 0; i < window.waypoints.length; i++) {
             createMap.removeLayer(window.waypoints[i].marker);

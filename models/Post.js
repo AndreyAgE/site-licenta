@@ -1,7 +1,7 @@
 //schema pentru postari
-var mongoose = require("mongoose");
+const mongoose = require("mongoose");
 //schema waypoint
-var waypointSchema = new mongoose.Schema({
+const waypointSchema = new mongoose.Schema({
     lat:  { type: Number, required: true },
     lng:  { type: Number, required: true },
     name: { type: String, required: true },
@@ -9,13 +9,13 @@ var waypointSchema = new mongoose.Schema({
     img:  { type: String }
 });
 //schema comentariu
-var commentSchema = new mongoose.Schema({
+const commentSchema = new mongoose.Schema({
     user: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
     text: { type: String, required: true },
     createdAt: { type: Date, default: Date.now }
 });
 //schema postarii
-var postSchema = new mongoose.Schema({
+const postSchema = new mongoose.Schema({
     user: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',

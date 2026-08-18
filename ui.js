@@ -1,28 +1,32 @@
 ﻿function hasAvatar(url) {
     return url && url.indexOf('pravatar.cc') === -1;
 }
+
 function avHTML(url, cls, id) {
-    var realUrl = hasAvatar(url) ? url : '';
-    var sizeClass = cls === 'avatar-micro' ? 'av-xs' : cls === 'avatar-small' ? 'av-sm' : '';
-    var idAttr = id ? ' id="' + id + '"' : '';
-    var imgPart = realUrl ? '<img src="' + realUrl + '" class="' + (cls || 'avatar') + '"' + idAttr + ' alt="Avatar">' : '';
+    const realUrl = hasAvatar(url) ? url : '';
+    const sizeClass = cls === 'avatar-micro' ? 'av-xs' : cls === 'avatar-small' ? 'av-sm' : '';
+    const idAttr = id ? ' id="' + id + '"' : '';
+    const imgPart = realUrl ? '<img src="' + realUrl + '" class="' + (cls || 'avatar') + '"' + idAttr + ' alt="Avatar">' : '';
     return '<div class="av-wrap ' + sizeClass + '"><i class="fa-solid fa-user"></i>' + imgPart + '</div>';
 }
+
 document.addEventListener("DOMContentLoaded", function() {
     // Initializez avatar si username din header cu datele din localStorage
-    var _initUser = localStorage.getItem("user");
+    const _initUser = localStorage.getItem("user");
     if (_initUser) {
-        var _u = JSON.parse(_initUser);
-        var _avatars   = document.querySelectorAll('.profile-trigger .avatar');
-        var _usernames = document.querySelectorAll('.profile-trigger .username');
-        for (var _i = 0; _i < _avatars.length;   _i++) { if (hasAvatar(_u.avatar)) { _avatars[_i].src = _u.avatar; _avatars[_i].classList.remove('av-hidden'); } }
-        for (var _j = 0; _j < _usernames.length; _j++) { if (_u.username) { _usernames[_j].textContent = _u.username; } }
+        const _u = JSON.parse(_initUser);
+        const _avatars   = document.querySelectorAll('.profile-trigger .avatar');
+        const _usernames = document.querySelectorAll('.profile-trigger .username');
+        for (let _i = 0; _i < _avatars.length;   _i++) { if (hasAvatar(_u.avatar)) { _avatars[_i].src = _u.avatar; _avatars[_i].classList.remove('av-hidden'); } }
+        for (let _j = 0; _j < _usernames.length; _j++) { if (_u.username) { _usernames[_j].textContent = _u.username; } }
     }
+
     // Iau referinte la butoanele si dropdown-urile din header
-    var btnNotifications = document.getElementById("btn-notifications");
-    var dropdownNotifications = document.getElementById("dropdown-notifications");
-    var btnProfile = document.getElementById("btn-profile");
-    var dropdownProfile = document.getElementById("dropdown-profile");
+    const btnNotifications = document.getElementById("btn-notifications");
+    const dropdownNotifications = document.getElementById("dropdown-notifications");
+    const btnProfile = document.getElementById("btn-profile");
+    const dropdownProfile = document.getElementById("dropdown-profile");
+
     // Functii globale pt deschis/inchis modaluri - le apeleaza si alte fisiere js
     window.openModal = function(modalEl) {
         if (modalEl) {
@@ -36,15 +40,17 @@ document.addEventListener("DOMContentLoaded", function() {
             modalEl.classList.add("hidden");
         }
     };
+
     // Inchidere modal prin butonul cu atributul data-close
     document.addEventListener("click", function(e) {
-        var closeBtn = e.target.closest("[data-close]");
+        const closeBtn = e.target.closest("[data-close]");
         if (closeBtn) {
             e.preventDefault();
-            var modalId = closeBtn.getAttribute("data-close");
+            const modalId = closeBtn.getAttribute("data-close");
             window.closeModal(document.getElementById(modalId));
         }
     });
+
     // Dropdown notificari - toggle la click pe clopot
     if (btnNotifications && dropdownNotifications) {
         btnNotifications.addEventListener("click", function(e) {
@@ -56,6 +62,7 @@ document.addEventListener("DOMContentLoaded", function() {
             }
         });
     }
+
     // Dropdown profil - toggle la click pe avatar
     if (btnProfile && dropdownProfile) {
         btnProfile.addEventListener("click", function(e) {
@@ -67,8 +74,9 @@ document.addEventListener("DOMContentLoaded", function() {
             }
         });
     }
+
     // Buton deconectare - sterge sesiunea si redirectioneaza la login
-    var logoutLink = document.querySelector('.dropdown-link.logout');
+    const logoutLink = document.querySelector('.dropdown-link.logout');
     if (logoutLink) {
         logoutLink.addEventListener('click', function(e) {
             e.preventDefault();
@@ -77,6 +85,7 @@ document.addEventListener("DOMContentLoaded", function() {
             window.location.href = "login.html";
         });
     }
+
     // Inchid dropdown-urile daca userul da click in alta parte a paginii
     document.addEventListener("click", function(e) {
         if (dropdownNotifications && !dropdownNotifications.contains(e.target) && !btnNotifications.contains(e.target)) {
@@ -86,24 +95,27 @@ document.addEventListener("DOMContentLoaded", function() {
             dropdownProfile.classList.add("hidden");
         }
     });
+
     // bara de cautare
-    var searchInput = document.querySelector('.search-bar input');
-    var searchDropdown = null;
-    var searchTimeout  = null;
+    const searchInput = document.querySelector('.search-bar input');
+    let searchDropdown = null;
+    let searchTimeout = null;
+
     function getOrCreateDropdown() {
         if (searchDropdown) { return searchDropdown; }
         searchDropdown = document.createElement('div');
         searchDropdown.className = 'search-dropdown hidden';
-        var bar = document.querySelector('.search-bar');
+        const bar = document.querySelector('.search-bar');
         if (bar) { bar.appendChild(searchDropdown); }
         return searchDropdown;
     }
+
     if (searchInput) {
         searchInput.addEventListener('input', function() {
-            var q = this.value.trim();
+            const q = this.value.trim();
             clearTimeout(searchTimeout);
             if (q.length < 2) {
-                var dd = getOrCreateDropdown();
+                const dd = getOrCreateDropdown();
                 dd.classList.add('hidden');
                 dd.innerHTML = '';
                 return;
@@ -112,7 +124,7 @@ document.addEventListener("DOMContentLoaded", function() {
         });
         searchInput.addEventListener('keydown', function(e) {
             if (e.key === 'Escape') {
-                var dd = getOrCreateDropdown();
+                const dd = getOrCreateDropdown();
                 dd.classList.add('hidden');
                 searchInput.value = '';
             }
@@ -123,27 +135,30 @@ document.addEventListener("DOMContentLoaded", function() {
             }
         });
     }
+
     async function doSearch(q) {
         console.log('search:', q);
-        var dd = getOrCreateDropdown();
+        const dd = getOrCreateDropdown();
         dd.innerHTML = '<div class="search-loading">Se cauta...</div>';
         dd.classList.remove('hidden');
         try {
-            var res   = await fetch('http://localhost:5000/api/auth/search?q=' + encodeURIComponent(q));
-            var data  = await res.json();
-            var users = data.users || [];
+            const res = await fetch('http://localhost:5000/api/auth/search?q=' + encodeURIComponent(q));
+            const data = await res.json();
+            const users = data.users || [];
+            
             // Cauta titluri de trasee in array-ul global deja incarcat
-            var posts = [];
+            const posts = [];
             if (window.postsArray && window.postsArray.length > 0) {
-                var ql = q.toLowerCase();
-                for (var i = 0; i < window.postsArray.length; i++) {
-                    var post = window.postsArray[i];
+                const ql = q.toLowerCase();
+                for (let i = 0; i < window.postsArray.length; i++) {
+                    const post = window.postsArray[i];
                     if (post.title && post.title.toLowerCase().indexOf(ql) !== -1) {
                         posts.push(post);
                         if (posts.length >= 5) { break; }
                     }
                 }
             }
+            
             dd.innerHTML = '';
             if (users.length === 0 && posts.length === 0) {
                 dd.innerHTML = '<div class="search-empty">Niciun rezultat găsit.</div>';
@@ -151,10 +166,10 @@ document.addEventListener("DOMContentLoaded", function() {
             }
             if (users.length > 0) {
                 dd.insertAdjacentHTML('beforeend', '<div class="search-section-title">Persoane</div>');
-                for (var ui = 0; ui < users.length; ui++) {
-                    var u = users[ui];
-                    var avatar = u.avatar || '';
-                    var item = document.createElement('div');
+                for (let ui = 0; ui < users.length; ui++) {
+                    const u = users[ui];
+                    const avatar = u.avatar || '';
+                    const item = document.createElement('div');
                     item.className = 'search-item search-user';
                     item.innerHTML = avHTML(avatar, 'avatar-micro') + '<span>' + u.username + '</span>';
                     (function(uid) {
@@ -169,9 +184,9 @@ document.addEventListener("DOMContentLoaded", function() {
             }
             if (posts.length > 0) {
                 dd.insertAdjacentHTML('beforeend', '<div class="search-section-title">Locații</div>');
-                for (var pi = 0; pi < posts.length; pi++) {
-                    var p = posts[pi];
-                    var item2 = document.createElement('div');
+                for (let pi = 0; pi < posts.length; pi++) {
+                    const p = posts[pi];
+                    const item2 = document.createElement('div');
                     item2.className = 'search-item search-post';
                     item2.innerHTML = '<i class="fa-solid fa-map-location-dot search-icon"></i>' +
                                       '<span>' + p.title + '</span>';
@@ -189,9 +204,10 @@ document.addEventListener("DOMContentLoaded", function() {
             dd.innerHTML = '<div class="search-empty">Eroare la căutare.</div>';
         }
     }
+
     // harta - traseele celor urmariti
-    var hartaLinks = document.querySelectorAll('.main-nav a');
-    for (var h = 0; h < hartaLinks.length; h++) {
+    const hartaLinks = document.querySelectorAll('.main-nav a');
+    for (let h = 0; h < hartaLinks.length; h++) {
         if (hartaLinks[h].textContent.trim() === 'Harta') {
             hartaLinks[h].addEventListener('click', function(e) {
                 e.preventDefault();
@@ -200,36 +216,44 @@ document.addEventListener("DOMContentLoaded", function() {
             break;
         }
     }
-    var followingMapInstance = null;
+
+    let followingMapInstance = null;
+
     function openFollowingMap() {
-        var overlay = document.getElementById('following-map-overlay');
+        const overlay = document.getElementById('following-map-overlay');
         if (!overlay) { return; }
         overlay.classList.remove('hidden');
         initFollowingMap();
     }
-    var closeFollowingMapBtn = document.getElementById('close-following-map');
+
+    const closeFollowingMapBtn = document.getElementById('close-following-map');
     if (closeFollowingMapBtn) {
         closeFollowingMapBtn.addEventListener('click', function() {
-            var overlay = document.getElementById('following-map-overlay');
+            const overlay = document.getElementById('following-map-overlay');
             if (overlay) { overlay.classList.add('hidden'); }
         });
     }
+
     // Inchide overlay la click in afara continutului hartii
-    var followingOverlay = document.getElementById('following-map-overlay');
+    const followingOverlay = document.getElementById('following-map-overlay');
     if (followingOverlay) {
         followingOverlay.addEventListener('click', function(e) {
             if (e.target === followingOverlay) { followingOverlay.classList.add('hidden'); }
         });
     }
+
     async function initFollowingMap() {
-        var container = document.getElementById('following-map-container');
+        const container = document.getElementById('following-map-container');
         if (!container || typeof L === 'undefined') { return; }
-        var userStr = localStorage.getItem("user");
+        
+        const userStr = localStorage.getItem("user");
         if (!userStr) {
             container.innerHTML = '<div class="map-empty-state"><i class="fa-solid fa-map-location-dot"></i><p>Trebuie să fii autentificat pentru a vedea harta.</p></div>';
             return;
         }
-        var userId = JSON.parse(userStr).id;
+        
+        const userId = JSON.parse(userStr).id;
+        
         // Distrug instanta veche si recreez containerul (fix Leaflet)
         if (followingMapInstance) {
             followingMapInstance.remove();
@@ -238,12 +262,14 @@ document.addEventListener("DOMContentLoaded", function() {
         container.innerHTML = '<div id="fm-inner" style="width:100%;height:100%;"></div>';
         followingMapInstance = L.map('fm-inner').setView([45.9432, 24.9668], 7);
         L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", { maxZoom: 19 }).addTo(followingMapInstance);
+        
         try {
-            var res   = await fetch('http://localhost:5000/api/posts/following/' + userId);
-            var posts = await res.json();
+            const res = await fetch('http://localhost:5000/api/posts/following/' + userId);
+            const posts = await res.json();
+            
             // Adaug postele din lista globala daca nu e pe profil.html
             if (window.postsArray && Array.isArray(posts)) {
-                for (var i = 0; i < posts.length; i++) {
+                for (let i = 0; i < posts.length; i++) {
                     if (!window.postsArray.find(function(p) { return p._id === posts[i]._id; })) {
                         window.postsArray.push(posts[i]);
                     }
@@ -253,21 +279,25 @@ document.addEventListener("DOMContentLoaded", function() {
                 container.innerHTML = '<div class="map-empty-state"><i class="fa-solid fa-map-location-dot"></i><p>Nicio locație de la persoanele urmărite.</p><p style="font-size:0.8rem;color:#666;">Urmărește utilizatori care au postat trasee ca să le vezi aici.</p></div>';
                 return;
             }
-            var bounds = [];
-            for (var j = 0; j < posts.length; j++) {
-                var post = posts[j];
+            
+            const bounds = [];
+            for (let j = 0; j < posts.length; j++) {
+                const post = posts[j];
                 if (!post.route || post.route.length === 0) { continue; }
+                
                 // Traseu ca polyline
-                var latlngs = [];
-                for (var k = 0; k < post.route.length; k++) {
+                const latlngs = [];
+                for (let k = 0; k < post.route.length; k++) {
                     latlngs.push([post.route[k].lat, post.route[k].lng]);
                     bounds.push([post.route[k].lat, post.route[k].lng]);
                 }
                 L.polyline(latlngs, { color: '#4cd137', weight: 3, opacity: 0.8 }).addTo(followingMapInstance);
+                
                 // Marker la primul waypoint al traseului
-                var wp0     = post.route[0];
-                var uname   = post.user ? post.user.username : 'Utilizator';
-                var marker  = L.marker([wp0.lat, wp0.lng]).addTo(followingMapInstance);
+                const wp0 = post.route[0];
+                const uname = post.user ? post.user.username : 'Utilizator';
+                const marker = L.marker([wp0.lat, wp0.lng]).addTo(followingMapInstance);
+                
                 marker.bindPopup(
                     '<div style="min-width:150px;">' +
                     '<strong>' + post.title + '</strong><br>' +
@@ -275,14 +305,15 @@ document.addEventListener("DOMContentLoaded", function() {
                     '<br><a href="#" style="color:#4cd137;font-size:0.8rem;" data-pid="' + post._id + '" class="fm-open-post">Deschide traseu</a>' +
                     '</div>'
                 );
+                
                 // Click pe link din popup
                 (function(postId) {
                     marker.on('popupopen', function() {
-                        var link = document.querySelector('.fm-open-post[data-pid="' + postId + '"]');
+                        const link = document.querySelector('.fm-open-post[data-pid="' + postId + '"]');
                         if (link) {
                             link.addEventListener('click', function(e) {
                                 e.preventDefault();
-                                var overlay = document.getElementById('following-map-overlay');
+                                const overlay = document.getElementById('following-map-overlay');
                                 if (overlay) { overlay.classList.add('hidden'); }
                                 if (window.populateAndOpenModal) { window.populateAndOpenModal(postId); }
                             });
@@ -300,22 +331,26 @@ document.addEventListener("DOMContentLoaded", function() {
             if (followingMapInstance) { followingMapInstance.invalidateSize(); }
         }, 200);
     }
+
     // ---- Admin panel ----
-    var currentUser = _initUser ? JSON.parse(_initUser) : null;
+    let currentUser = _initUser ? JSON.parse(_initUser) : null;
     function updateStoredUser(u) {
         if (u) { currentUser = u; localStorage.setItem('user', JSON.stringify(u)); }
     }
-    var adminPanel = null, adminList = null, adminUsersList = null;
+    
+    let adminPanel = null, adminList = null, adminUsersList = null;
+    
     function hideAdminPanel() {
         if (adminPanel) { adminPanel.hidden = true; adminPanel.style.display = 'none'; }
-        var root = document.getElementById('admin-panel-root');
+        const root = document.getElementById('admin-panel-root');
         if (root) { root.innerHTML = ''; }
-        var lb = document.getElementById('leaderboard-sidebar');
+        const lb = document.getElementById('leaderboard-sidebar');
         if (lb) { lb.style.display = ''; }
     }
+    
     function ensureAdminPanel() {
         if (!document.getElementById('admin-panel')) {
-            var root = document.getElementById('admin-panel-root');
+            const root = document.getElementById('admin-panel-root');
             if (!root) { return null; }
             root.insertAdjacentHTML('afterbegin', [
                 '<div class="sidebar-card admin-panel-card" id="admin-panel">',
@@ -336,12 +371,13 @@ document.addEventListener("DOMContentLoaded", function() {
         adminUsersList = document.getElementById('admin-user-list');
         return adminPanel;
     }
+
     function resolveUserRole(callback) {
         if (!currentUser || !currentUser.id) { hideAdminPanel(); return callback('user'); }
         fetch('http://localhost:5000/api/auth/user/' + currentUser.id)
             .then(function(r) { if (!r.ok) { throw new Error(); } return r.json(); })
             .then(function(profile) {
-                var role = (profile && profile.role) ? profile.role : 'user';
+                const role = (profile && profile.role) ? profile.role : 'user';
                 if (profile && profile.username) { currentUser.username = profile.username; }
                 currentUser.role = role;
                 updateStoredUser(currentUser);
@@ -349,36 +385,38 @@ document.addEventListener("DOMContentLoaded", function() {
             })
             .catch(function() { hideAdminPanel(); callback('user'); });
     }
+
     function renderAdminPanel() {
         resolveUserRole(function(role) {
             if (role !== 'admin') { hideAdminPanel(); return; }
-            var lb = document.getElementById('leaderboard-sidebar');
+            const lb = document.getElementById('leaderboard-sidebar');
             if (lb) { lb.style.display = 'none'; }
             ensureAdminPanel();
             if (!adminPanel) { return; }
             adminPanel.hidden = false;
             adminPanel.style.display = '';
+            
             // Incarc postari
             fetch('http://localhost:5000/api/posts')
                 .then(function(r) { return r.json(); })
                 .then(function(posts) {
-                    var countEl = document.getElementById('admin-posts-count');
+                    const countEl = document.getElementById('admin-posts-count');
                     if (countEl) { countEl.textContent = posts.length; }
                     if (!adminList) { return; }
                     adminList.innerHTML = '';
-                    for (var i = 0; i < Math.min(posts.length, 20); i++) {
-                        var p = posts[i];
-                        var li = document.createElement('li');
+                    for (let i = 0; i < Math.min(posts.length, 20); i++) {
+                        const p = posts[i];
+                        const li = document.createElement('li');
                         li.className = 'admin-list-item';
-                        var pTitle = p.title || 'Fara titlu';
-                        var pUser  = p.user && p.user.username ? p.user.username : 'Utilizator';
+                        const pTitle = p.title || 'Fara titlu';
+                        const pUser  = p.user && p.user.username ? p.user.username : 'Utilizator';
                         li.innerHTML =
                             '<span class="admin-item-info"><span class="admin-item-title">' + pTitle + '</span>' +
                             '<span class="admin-item-sub">' + pUser + '</span></span>' +
                             '<button class="admin-del-btn" title="Sterge postarea" data-postid="' + p._id + '">' +
                             '<i class="fa-solid fa-trash"></i></button>';
                         (function(postId) {
-                            var delBtn = li.querySelector('.admin-del-btn');
+                            const delBtn = li.querySelector('.admin-del-btn');
                             delBtn.addEventListener('click', function() {
                                 if (!confirm('Stergi postarea?')) { return; }
                                 fetch('http://localhost:5000/api/posts/' + postId, {
@@ -391,9 +429,9 @@ document.addEventListener("DOMContentLoaded", function() {
                                         if (window.postsArray) {
                                             window.postsArray = window.postsArray.filter(function(x) { return String(x._id) !== postId; });
                                         }
-                                        var fc = document.getElementById('feed-container');
+                                        const fc = document.getElementById('feed-container');
                                         if (fc) {
-                                            var card = fc.querySelector('[data-post-id="' + postId + '"]');
+                                            const card = fc.querySelector('[data-post-id="' + postId + '"]');
                                             if (card) { card.remove(); }
                                         }
                                     } else { alert('Eroare la stergere.'); }
@@ -403,27 +441,28 @@ document.addEventListener("DOMContentLoaded", function() {
                         adminList.appendChild(li);
                     }
                 }).catch(function() {});
+                
             // Incarc utilizatori
             fetch('http://localhost:5000/api/auth/users')
                 .then(function(r) { return r.json(); })
                 .then(function(users) {
-                    var countEl2 = document.getElementById('admin-users-count');
+                    const countEl2 = document.getElementById('admin-users-count');
                     if (countEl2) { countEl2.textContent = users.length; }
                     if (!adminUsersList) { return; }
                     adminUsersList.innerHTML = '';
-                    for (var j = 0; j < users.length; j++) {
-                        var u = users[j];
-                        var li2 = document.createElement('li');
+                    for (let j = 0; j < users.length; j++) {
+                        const u = users[j];
+                        const li2 = document.createElement('li');
                         li2.className = 'admin-list-item';
-                        var uRole = u.role || 'user';
-                        var uEmail = u.email || '';
+                        const uRole = u.role || 'user';
+                        const uEmail = u.email || '';
                         li2.innerHTML =
                             '<span class="admin-item-info"><span class="admin-item-title">' + u.username + '</span>' +
                             '<span class="admin-item-sub">' + uEmail + ' • ' + uRole + '</span></span>' +
                             '<button class="admin-del-btn" title="Sterge utilizatorul" data-uid="' + u._id + '">' +
                             '<i class="fa-solid fa-trash"></i></button>';
                         (function(uid, uname) {
-                            var delBtn2 = li2.querySelector('.admin-del-btn');
+                            const delBtn2 = li2.querySelector('.admin-del-btn');
                             delBtn2.addEventListener('click', function() {
                                 if (!confirm('Stergi utilizatorul ' + uname + '?')) { return; }
                                 fetch('http://localhost:5000/api/auth/user/' + uid, {
@@ -443,23 +482,25 @@ document.addEventListener("DOMContentLoaded", function() {
     }
     renderAdminPanel();
 });
-// ataseaza click pe un item de notificare
+
+// click pe notificare
 window.attachNotifClick = function(el, notif) {
     el.style.cursor = 'pointer';
     el.addEventListener('click', async function() {
-        var type = notif.type;
-        var senderId = notif.sender ? String(notif.sender._id || notif.sender) : null;
-        var postId = notif.post   ? String(notif.post._id   || notif.post)   : null;
+        const type = notif.type;
+        const senderId = notif.sender ? String(notif.sender._id || notif.sender) : null;
+        const postId = notif.post   ? String(notif.post._id   || notif.post)   : null;
         if (type === 'follow' && senderId) {
             window.location.href = 'profil.html?id=' + senderId;
             return;
         }
         if (!postId) { return; }
+        
         // Caut postarea in array-ul global; daca nu e, o iau de la server
-        var found = window.postsArray && window.postsArray.find(function(p) { return String(p._id) === postId; });
+        let found = window.postsArray && window.postsArray.find(function(p) { return String(p._id) === postId; });
         if (!found) {
             try {
-                var res = await fetch('http://localhost:5000/api/posts/' + postId);
+                const res = await fetch('http://localhost:5000/api/posts/' + postId);
                 if (res.ok) {
                     found = await res.json();
                     if (!window.postsArray) { window.postsArray = []; }
@@ -472,15 +513,16 @@ window.attachNotifClick = function(el, notif) {
         }
     });
 };
+
 // Mobile bottom nav - toggle panouri laterale
 (function() {
-    var btnFeed    = document.getElementById('mob-btn-feed');
-    var btnPost    = document.getElementById('mob-btn-post');
-    var btnGems    = document.getElementById('mob-btn-gems');
-    var btnMsg     = document.getElementById('mob-btn-msg');
-    var backdrop   = document.getElementById('mobile-panel-backdrop');
-    var leftPanel  = document.querySelector('.left-main');
-    var rightPanel = document.querySelector('.right-main');
+    const btnFeed = document.getElementById('mob-btn-feed');
+    const btnPost = document.getElementById('mob-btn-post');
+    const btnGems = document.getElementById('mob-btn-gems');
+    const btnMsg = document.getElementById('mob-btn-msg');
+    const backdrop = document.getElementById('mobile-panel-backdrop');
+    const leftPanel = document.querySelector('.left-main');
+    const rightPanel = document.querySelector('.right-main');
     if (!btnFeed || !btnGems || !btnMsg) { return; }
 
     function closePanels() {
@@ -495,20 +537,20 @@ window.attachNotifClick = function(el, notif) {
     btnFeed.addEventListener('click', function() {
         closePanels();
     });
-
+    
     if (btnPost) {
         btnPost.addEventListener('click', function() {
             closePanels();
-            var postModal = document.getElementById('create-post-modal');
+            const postModal = document.getElementById('create-post-modal');
             if (postModal && window.openModal) {
                 window.openModal(postModal);
                 if (window.initCreateMap) { window.initCreateMap(); }
             }
         });
     }
-
+    
     btnGems.addEventListener('click', function() {
-        var isOpen = leftPanel && leftPanel.classList.contains('mobile-open');
+        const isOpen = leftPanel && leftPanel.classList.contains('mobile-open');
         closePanels();
         if (!isOpen) {
             if (leftPanel)  { leftPanel.classList.add('mobile-open'); }
@@ -517,9 +559,9 @@ window.attachNotifClick = function(el, notif) {
             btnGems.classList.add('active');
         }
     });
-
+    
     btnMsg.addEventListener('click', function() {
-        var isOpen = rightPanel && rightPanel.classList.contains('mobile-open');
+        const isOpen = rightPanel && rightPanel.classList.contains('mobile-open');
         closePanels();
         if (!isOpen) {
             if (rightPanel) { rightPanel.classList.add('mobile-open'); }
@@ -528,7 +570,7 @@ window.attachNotifClick = function(el, notif) {
             btnMsg.classList.add('active');
         }
     });
-
+    
     if (backdrop) {
         backdrop.addEventListener('click', function() {
             closePanels();
