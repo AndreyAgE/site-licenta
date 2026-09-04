@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+//structura unui grup
 const groupSchema = new mongoose.Schema({
     creator: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
     name: { type: String, required: true },
@@ -6,6 +7,5 @@ const groupSchema = new mongoose.Schema({
     dateTime: { type: String, default: '' },
     maxMembers: { type: Number, default: 10 },
     members: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }]
-}, 
-{ timestamps: true });
+}, { timestamps: true });
 module.exports = mongoose.model("Group", groupSchema);

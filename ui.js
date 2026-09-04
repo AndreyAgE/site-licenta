@@ -1,15 +1,114 @@
-﻿function hasAvatar(url) {
+function hasAvatar(url) {
     return url && url.indexOf('pravatar.cc') === -1;
 }
+// avatar ca element DOM (nu string html) - il refolosesc in orice lista dinamica
 
-function avHTML(url, cls, id) {
+function avatarBit(url, cls) {
+    const wrap = document.createElement('div');
+    wrap.className = 'av-wrap' + (cls === 'avatar-micro' ? ' av-xs' : cls === 'avatar-small' ? ' av-sm' : '');
+    const icon = document.createElement('i');
+    icon.className = 'fa-solid fa-user';
+    wrap.appendChild(icon);
     const realUrl = hasAvatar(url) ? url : '';
-    const sizeClass = cls === 'avatar-micro' ? 'av-xs' : cls === 'avatar-small' ? 'av-sm' : '';
-    const idAttr = id ? ' id="' + id + '"' : '';
-    const imgPart = realUrl ? '<img src="' + realUrl + '" class="' + (cls || 'avatar') + '"' + idAttr + ' alt="Avatar">' : '';
-    return '<div class="av-wrap ' + sizeClass + '"><i class="fa-solid fa-user"></i>' + imgPart + '</div>';
+    if (realUrl) {
+        const img = document.createElement('img');
+        img.className = cls || 'avatar';
+        img.src = realUrl;
+        img.alt = 'Avatar';
+        wrap.appendChild(img);
+    }
+    return wrap;
 }
-
+window.avatarBit = avatarBit;
+// textul unei notificari dupa tip - il foloseau feed.js si profil.js, fiecare cu copia lui
+function notifText(n) {
+    const name = n.sender ? n.sender.username : 'Cineva';
+    if (n.type === 'like') { return name + ' a dat like la postarea ta.'; }
+    if (n.type === 'gem') { return name + ' ti-a oferit 💎 gems.'; }
+    if (n.type === 'follow') { return name + ' a inceput sa te urmareasca.'; }
+    if (n.type === 'comment') { return name + ' a comentat la postarea ta.'; }
+    return 'Notificare noua.';
+}
+window.notifText = notifText;
+// un rand din dropdown-ul de notificari, dintr-un template ca sa nu mai fie innerHTML
+function renderNotifRow(n) {
+    const tpl = document.getElementById('notif-template');
+    if (!tpl) { return null; }
+    const node = tpl.content.cloneNode(true);
+    const item = node.querySelector('.notif-item');
+    const img = item.querySelector('.avatar-micro');
+    const url = n.sender ? n.sender.avatar : '';
+    if (hasAvatar(url)) { img.src = url; img.classList.remove('av-hidden'); }
+    item.querySelector('.notif-text').textContent = notifText(n);
+    if (window.attachNotifClick) { window.attachNotifClick(item, n); }
+    return item;
+}
+window.renderNotifRow = renderNotifRow;
+function setNotifBadge(count) {
+    const badge = document.querySelector('#btn-notifications .badge');
+    if (badge) { badge.textContent = count > 0 ? count : ''; }
+}
+window.setNotifBadge = setNotifBadge;
+// incarca si populeaza dropdown-ul de notificari - facea asta si index-ul si profilul, fiecare cu logica lui
+async function loadNotifDropdown(userId) {
+    const menu = document.getElementById('dropdown-notifications');
+    try {
+        const res = await fetch('http://localhost:5000/api/notifications/' + userId);
+        if (!res.ok) { return; }
+        const list = await res.json();
+        setNotifBadge(list.length);
+        if (!menu) { return; }
+        const head = menu.querySelector('h4');
+        menu.replaceChildren();
+        if (head) { menu.appendChild(head); }
+        if (list.length === 0) {
+            const p = document.createElement('p');
+            p.style.cssText = 'color:#aaa;text-align:center;padding:15px;font-size:0.85rem;';
+            p.textContent = 'Nicio notificare noua.';
+            menu.appendChild(p);
+        } else {
+            for (let i = 0; i < list.length; i++) {
+                const row = renderNotifRow(list[i]);
+                if (row) { menu.appendChild(row); }
+            }
+        }
+        const btn = document.getElementById('btn-notifications');
+        if (btn) {
+            btn.addEventListener('click', async function() {
+                await fetch('http://localhost:5000/api/notifications/read-all/' + userId, { method: 'PUT' });
+                setTimeout(function() { setNotifBadge(0); }, 500);
+            }, { once: true });
+        }
+    } catch (e) {}
+}
+window.loadNotifDropdown = loadNotifDropdown;
+// follow/unfollow - acelasi apel era duplicat in modalul de postare si in pagina de profil
+async function sendFollow(targetId, myId) {
+    const res = await fetch('http://localhost:5000/api/auth/user/' + targetId + '/follow', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ followerId: myId })
+    });
+    if (!res.ok) { return null; }
+    return res.json();
+}
+window.sendFollow = sendFollow;
+// harta de baza cu tile-ul OSM - o reinitializau la fel map.js, feed.js, profil.js si ui.js
+function makeMap(containerId, opts) {
+    const map = L.map(containerId);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(map);
+    if (opts && opts.center) { map.setView(opts.center, opts.zoom || 7); }
+    return map;
+}
+window.makeMap = makeMap;
+// un mesaj simplu de status (goale, erori) fara innerHTML
+function statusMsg(box, text) {
+    const p = document.createElement('p');
+    p.className = 'map-empty-line';
+    p.textContent = text;
+    box.appendChild(p);
+    return p;
+}
 document.addEventListener("DOMContentLoaded", function() {
     // Initializez avatar si username din header cu datele din localStorage
     const _initUser = localStorage.getItem("user");
@@ -20,13 +119,11 @@ document.addEventListener("DOMContentLoaded", function() {
         for (let _i = 0; _i < _avatars.length;   _i++) { if (hasAvatar(_u.avatar)) { _avatars[_i].src = _u.avatar; _avatars[_i].classList.remove('av-hidden'); } }
         for (let _j = 0; _j < _usernames.length; _j++) { if (_u.username) { _usernames[_j].textContent = _u.username; } }
     }
-
     // Iau referinte la butoanele si dropdown-urile din header
     const btnNotifications = document.getElementById("btn-notifications");
     const dropdownNotifications = document.getElementById("dropdown-notifications");
     const btnProfile = document.getElementById("btn-profile");
     const dropdownProfile = document.getElementById("dropdown-profile");
-
     // Functii globale pt deschis/inchis modaluri - le apeleaza si alte fisiere js
     window.openModal = function(modalEl) {
         if (modalEl) {
@@ -40,7 +137,6 @@ document.addEventListener("DOMContentLoaded", function() {
             modalEl.classList.add("hidden");
         }
     };
-
     // Inchidere modal prin butonul cu atributul data-close
     document.addEventListener("click", function(e) {
         const closeBtn = e.target.closest("[data-close]");
@@ -50,7 +146,6 @@ document.addEventListener("DOMContentLoaded", function() {
             window.closeModal(document.getElementById(modalId));
         }
     });
-
     // Dropdown notificari - toggle la click pe clopot
     if (btnNotifications && dropdownNotifications) {
         btnNotifications.addEventListener("click", function(e) {
@@ -62,7 +157,6 @@ document.addEventListener("DOMContentLoaded", function() {
             }
         });
     }
-
     // Dropdown profil - toggle la click pe avatar
     if (btnProfile && dropdownProfile) {
         btnProfile.addEventListener("click", function(e) {
@@ -74,7 +168,6 @@ document.addEventListener("DOMContentLoaded", function() {
             }
         });
     }
-
     // Buton deconectare - sterge sesiunea si redirectioneaza la login
     const logoutLink = document.querySelector('.dropdown-link.logout');
     if (logoutLink) {
@@ -85,7 +178,6 @@ document.addEventListener("DOMContentLoaded", function() {
             window.location.href = "login.html";
         });
     }
-
     // Inchid dropdown-urile daca userul da click in alta parte a paginii
     document.addEventListener("click", function(e) {
         if (dropdownNotifications && !dropdownNotifications.contains(e.target) && !btnNotifications.contains(e.target)) {
@@ -95,12 +187,10 @@ document.addEventListener("DOMContentLoaded", function() {
             dropdownProfile.classList.add("hidden");
         }
     });
-
     // bara de cautare
     const searchInput = document.querySelector('.search-bar input');
     let searchDropdown = null;
-    let searchTimeout = null;
-
+    let searchTimeout  = null;
     function getOrCreateDropdown() {
         if (searchDropdown) { return searchDropdown; }
         searchDropdown = document.createElement('div');
@@ -109,7 +199,6 @@ document.addEventListener("DOMContentLoaded", function() {
         if (bar) { bar.appendChild(searchDropdown); }
         return searchDropdown;
     }
-
     if (searchInput) {
         searchInput.addEventListener('input', function() {
             const q = this.value.trim();
@@ -117,7 +206,7 @@ document.addEventListener("DOMContentLoaded", function() {
             if (q.length < 2) {
                 const dd = getOrCreateDropdown();
                 dd.classList.add('hidden');
-                dd.innerHTML = '';
+                dd.replaceChildren();
                 return;
             }
             searchTimeout = setTimeout(function() { doSearch(q); }, 300);
@@ -135,17 +224,21 @@ document.addEventListener("DOMContentLoaded", function() {
             }
         });
     }
-
+    function searchSectionTitle(text) {
+        const div = document.createElement('div');
+        div.className = 'search-section-title';
+        div.textContent = text;
+        return div;
+    }
     async function doSearch(q) {
-        console.log('search:', q);
         const dd = getOrCreateDropdown();
-        dd.innerHTML = '<div class="search-loading">Se cauta...</div>';
+        dd.replaceChildren();
+        statusMsg(dd, 'Se cauta...').className = 'search-loading';
         dd.classList.remove('hidden');
         try {
-            const res = await fetch('http://localhost:5000/api/auth/search?q=' + encodeURIComponent(q));
-            const data = await res.json();
+            const res   = await fetch('http://localhost:5000/api/auth/search?q=' + encodeURIComponent(q));
+            const data  = await res.json();
             const users = data.users || [];
-            
             // Cauta titluri de trasee in array-ul global deja incarcat
             const posts = [];
             if (window.postsArray && window.postsArray.length > 0) {
@@ -158,20 +251,21 @@ document.addEventListener("DOMContentLoaded", function() {
                     }
                 }
             }
-            
-            dd.innerHTML = '';
+            dd.replaceChildren();
             if (users.length === 0 && posts.length === 0) {
-                dd.innerHTML = '<div class="search-empty">Niciun rezultat găsit.</div>';
+                statusMsg(dd, 'Niciun rezultat găsit.').className = 'search-empty';
                 return;
             }
             if (users.length > 0) {
-                dd.insertAdjacentHTML('beforeend', '<div class="search-section-title">Persoane</div>');
+                dd.appendChild(searchSectionTitle('Persoane'));
                 for (let ui = 0; ui < users.length; ui++) {
                     const u = users[ui];
-                    const avatar = u.avatar || '';
                     const item = document.createElement('div');
                     item.className = 'search-item search-user';
-                    item.innerHTML = avHTML(avatar, 'avatar-micro') + '<span>' + u.username + '</span>';
+                    item.appendChild(avatarBit(u.avatar || '', 'avatar-micro'));
+                    const nameSpan = document.createElement('span');
+                    nameSpan.textContent = u.username;
+                    item.appendChild(nameSpan);
                     (function(uid) {
                         item.addEventListener('click', function() {
                             window.location.href = 'profil.html?id=' + uid;
@@ -183,13 +277,17 @@ document.addEventListener("DOMContentLoaded", function() {
                 }
             }
             if (posts.length > 0) {
-                dd.insertAdjacentHTML('beforeend', '<div class="search-section-title">Locații</div>');
+                dd.appendChild(searchSectionTitle('Locații'));
                 for (let pi = 0; pi < posts.length; pi++) {
                     const p = posts[pi];
                     const item2 = document.createElement('div');
                     item2.className = 'search-item search-post';
-                    item2.innerHTML = '<i class="fa-solid fa-map-location-dot search-icon"></i>' +
-                                      '<span>' + p.title + '</span>';
+                    const icon = document.createElement('i');
+                    icon.className = 'fa-solid fa-map-location-dot search-icon';
+                    item2.appendChild(icon);
+                    const titleSpan = document.createElement('span');
+                    titleSpan.textContent = p.title;
+                    item2.appendChild(titleSpan);
                     (function(pid) {
                         item2.addEventListener('click', function() {
                             if (window.populateAndOpenModal) { window.populateAndOpenModal(pid); }
@@ -201,10 +299,10 @@ document.addEventListener("DOMContentLoaded", function() {
                 }
             }
         } catch (e) {
-            dd.innerHTML = '<div class="search-empty">Eroare la căutare.</div>';
+            dd.replaceChildren();
+            statusMsg(dd, 'Eroare la căutare.').className = 'search-empty';
         }
     }
-
     // harta - traseele celor urmariti
     const hartaLinks = document.querySelectorAll('.main-nav a');
     for (let h = 0; h < hartaLinks.length; h++) {
@@ -216,16 +314,13 @@ document.addEventListener("DOMContentLoaded", function() {
             break;
         }
     }
-
     let followingMapInstance = null;
-
     function openFollowingMap() {
         const overlay = document.getElementById('following-map-overlay');
         if (!overlay) { return; }
         overlay.classList.remove('hidden');
         initFollowingMap();
     }
-
     const closeFollowingMapBtn = document.getElementById('close-following-map');
     if (closeFollowingMapBtn) {
         closeFollowingMapBtn.addEventListener('click', function() {
@@ -233,7 +328,6 @@ document.addEventListener("DOMContentLoaded", function() {
             if (overlay) { overlay.classList.add('hidden'); }
         });
     }
-
     // Inchide overlay la click in afara continutului hartii
     const followingOverlay = document.getElementById('following-map-overlay');
     if (followingOverlay) {
@@ -241,32 +335,44 @@ document.addEventListener("DOMContentLoaded", function() {
             if (e.target === followingOverlay) { followingOverlay.classList.add('hidden'); }
         });
     }
-
+    function mapEmptyState(container, icon, lines) {
+        container.replaceChildren();
+        const box = document.createElement('div');
+        box.className = 'map-empty-state';
+        const i = document.createElement('i');
+        i.className = icon;
+        box.appendChild(i);
+        lines.forEach(function(line) {
+            const p = document.createElement('p');
+            if (line.small) { p.style.cssText = 'font-size:0.8rem;color:#666;'; }
+            p.textContent = line.text;
+            box.appendChild(p);
+        });
+        container.appendChild(box);
+    }
     async function initFollowingMap() {
         const container = document.getElementById('following-map-container');
         if (!container || typeof L === 'undefined') { return; }
-        
         const userStr = localStorage.getItem("user");
         if (!userStr) {
-            container.innerHTML = '<div class="map-empty-state"><i class="fa-solid fa-map-location-dot"></i><p>Trebuie să fii autentificat pentru a vedea harta.</p></div>';
+            mapEmptyState(container, 'fa-solid fa-map-location-dot', [{ text: 'Trebuie să fii autentificat pentru a vedea harta.' }]);
             return;
         }
-        
         const userId = JSON.parse(userStr).id;
-        
         // Distrug instanta veche si recreez containerul (fix Leaflet)
         if (followingMapInstance) {
             followingMapInstance.remove();
             followingMapInstance = null;
         }
-        container.innerHTML = '<div id="fm-inner" style="width:100%;height:100%;"></div>';
-        followingMapInstance = L.map('fm-inner').setView([45.9432, 24.9668], 7);
-        L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", { maxZoom: 19 }).addTo(followingMapInstance);
-        
+        container.replaceChildren();
+        const inner = document.createElement('div');
+        inner.id = 'fm-inner';
+        inner.style.cssText = 'width:100%;height:100%;';
+        container.appendChild(inner);
+        followingMapInstance = window.makeMap('fm-inner', { center: [45.9432, 24.9668], zoom: 7 });
         try {
-            const res = await fetch('http://localhost:5000/api/posts/following/' + userId);
+            const res   = await fetch('http://localhost:5000/api/posts/following/' + userId);
             const posts = await res.json();
-            
             // Adaug postele din lista globala daca nu e pe profil.html
             if (window.postsArray && Array.isArray(posts)) {
                 for (let i = 0; i < posts.length; i++) {
@@ -276,15 +382,16 @@ document.addEventListener("DOMContentLoaded", function() {
                 }
             }
             if (!posts || posts.length === 0) {
-                container.innerHTML = '<div class="map-empty-state"><i class="fa-solid fa-map-location-dot"></i><p>Nicio locație de la persoanele urmărite.</p><p style="font-size:0.8rem;color:#666;">Urmărește utilizatori care au postat trasee ca să le vezi aici.</p></div>';
+                mapEmptyState(container, 'fa-solid fa-map-location-dot', [
+                    { text: 'Nicio locație de la persoanele urmărite.' },
+                    { text: 'Urmărește utilizatori care au postat trasee ca să le vezi aici.', small: true }
+                ]);
                 return;
             }
-            
             const bounds = [];
             for (let j = 0; j < posts.length; j++) {
                 const post = posts[j];
                 if (!post.route || post.route.length === 0) { continue; }
-                
                 // Traseu ca polyline
                 const latlngs = [];
                 for (let k = 0; k < post.route.length; k++) {
@@ -292,86 +399,100 @@ document.addEventListener("DOMContentLoaded", function() {
                     bounds.push([post.route[k].lat, post.route[k].lng]);
                 }
                 L.polyline(latlngs, { color: '#4cd137', weight: 3, opacity: 0.8 }).addTo(followingMapInstance);
-                
                 // Marker la primul waypoint al traseului
-                const wp0 = post.route[0];
-                const uname = post.user ? post.user.username : 'Utilizator';
-                const marker = L.marker([wp0.lat, wp0.lng]).addTo(followingMapInstance);
-                
-                marker.bindPopup(
-                    '<div style="min-width:150px;">' +
-                    '<strong>' + post.title + '</strong><br>' +
-                    '<span style="color:#4cd137;font-size:0.8rem;">' + uname + ' • ' + post.difficulty + '</span>' +
-                    '<br><a href="#" style="color:#4cd137;font-size:0.8rem;" data-pid="' + post._id + '" class="fm-open-post">Deschide traseu</a>' +
-                    '</div>'
-                );
-                
-                // Click pe link din popup
-                (function(postId) {
-                    marker.on('popupopen', function() {
-                        const link = document.querySelector('.fm-open-post[data-pid="' + postId + '"]');
-                        if (link) {
-                            link.addEventListener('click', function(e) {
-                                e.preventDefault();
-                                const overlay = document.getElementById('following-map-overlay');
-                                if (overlay) { overlay.classList.add('hidden'); }
-                                if (window.populateAndOpenModal) { window.populateAndOpenModal(postId); }
-                            });
-                        }
-                    });
-                })(post._id);
+                const wp0     = post.route[0];
+                const uname   = post.user ? post.user.username : 'Utilizator';
+                const marker  = L.marker([wp0.lat, wp0.lng]).addTo(followingMapInstance);
+
+                const pop = document.createElement('div');
+                pop.style.minWidth = '150px';
+                const strong = document.createElement('strong');
+                strong.textContent = post.title;
+                pop.appendChild(strong);
+                pop.appendChild(document.createElement('br'));
+                const sub = document.createElement('span');
+                sub.style.cssText = 'color:#4cd137;font-size:0.8rem;';
+                sub.textContent = uname + ' • ' + post.difficulty;
+                pop.appendChild(sub);
+                pop.appendChild(document.createElement('br'));
+                const link = document.createElement('a');
+                link.href = '#';
+                link.style.cssText = 'color:#4cd137;font-size:0.8rem;';
+                link.textContent = 'Deschide traseu';
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const overlay = document.getElementById('following-map-overlay');
+                    if (overlay) { overlay.classList.add('hidden'); }
+                    if (window.populateAndOpenModal) { window.populateAndOpenModal(post._id); }
+                });
+                pop.appendChild(link);
+                marker.bindPopup(pop);
             }
             if (bounds.length > 0) {
                 followingMapInstance.fitBounds(bounds, { padding: [40, 40] });
             }
         } catch (e) {
-            container.innerHTML = '<div class="map-empty-state"><i class="fa-solid fa-map-location-dot"></i><p>Eroare la încărcarea traseelor.</p></div>';
+            mapEmptyState(container, 'fa-solid fa-map-location-dot', [{ text: 'Eroare la încărcarea traseelor.' }]);
         }
         setTimeout(function() {
             if (followingMapInstance) { followingMapInstance.invalidateSize(); }
         }, 200);
     }
-
     // ---- Admin panel ----
     let currentUser = _initUser ? JSON.parse(_initUser) : null;
     function updateStoredUser(u) {
         if (u) { currentUser = u; localStorage.setItem('user', JSON.stringify(u)); }
     }
-    
     let adminPanel = null, adminList = null, adminUsersList = null;
-    
     function hideAdminPanel() {
         if (adminPanel) { adminPanel.hidden = true; adminPanel.style.display = 'none'; }
         const root = document.getElementById('admin-panel-root');
-        if (root) { root.innerHTML = ''; }
+        if (root) { root.replaceChildren(); }
         const lb = document.getElementById('leaderboard-sidebar');
         if (lb) { lb.style.display = ''; }
     }
-    
+    function buildAdminSection(title, listId, countId) {
+        const section = document.createElement('div');
+        section.className = 'admin-section';
+        const titleRow = document.createElement('div');
+        titleRow.className = 'admin-section-title';
+        const titleSpan = document.createElement('span');
+        titleSpan.textContent = title;
+        const countSpan = document.createElement('span');
+        countSpan.className = 'admin-section-count';
+        countSpan.id = countId;
+        titleRow.append(titleSpan, countSpan);
+        const list = document.createElement('ul');
+        list.className = 'admin-list';
+        list.id = listId;
+        section.append(titleRow, list);
+        return section;
+    }
     function ensureAdminPanel() {
         if (!document.getElementById('admin-panel')) {
             const root = document.getElementById('admin-panel-root');
             if (!root) { return null; }
-            root.insertAdjacentHTML('afterbegin', [
-                '<div class="sidebar-card admin-panel-card" id="admin-panel">',
-                '<div class="admin-panel-header"><span class="admin-badge">&#9670;</span><h3>Panou Admin</h3></div>',
-                '<div class="admin-section">',
-                '<div class="admin-section-title"><span>Postări</span><span class="admin-section-count" id="admin-posts-count"></span></div>',
-                '<ul id="admin-post-list" class="admin-list"></ul>',
-                '</div>',
-                '<div class="admin-section">',
-                '<div class="admin-section-title"><span>Utilizatori</span><span class="admin-section-count" id="admin-users-count"></span></div>',
-                '<ul id="admin-user-list" class="admin-list"></ul>',
-                '</div>',
-                '</div>'
-            ].join(''));
+            const card = document.createElement('div');
+            card.className = 'sidebar-card admin-panel-card';
+            card.id = 'admin-panel';
+            const header = document.createElement('div');
+            header.className = 'admin-panel-header';
+            const badge = document.createElement('span');
+            badge.className = 'admin-badge';
+            badge.textContent = '◆';
+            const h3 = document.createElement('h3');
+            h3.textContent = 'Panou Admin';
+            header.append(badge, h3);
+            card.appendChild(header);
+            card.appendChild(buildAdminSection('Postări', 'admin-post-list', 'admin-posts-count'));
+            card.appendChild(buildAdminSection('Utilizatori', 'admin-user-list', 'admin-users-count'));
+            root.prepend(card);
         }
         adminPanel = document.getElementById('admin-panel');
         adminList = document.getElementById('admin-post-list');
         adminUsersList = document.getElementById('admin-user-list');
         return adminPanel;
     }
-
     function resolveUserRole(callback) {
         if (!currentUser || !currentUser.id) { hideAdminPanel(); return callback('user'); }
         fetch('http://localhost:5000/api/auth/user/' + currentUser.id)
@@ -385,7 +506,28 @@ document.addEventListener("DOMContentLoaded", function() {
             })
             .catch(function() { hideAdminPanel(); callback('user'); });
     }
-
+    function adminRow(title, sub, onDelete) {
+        const li = document.createElement('li');
+        li.className = 'admin-list-item';
+        const info = document.createElement('span');
+        info.className = 'admin-item-info';
+        const titleSpan = document.createElement('span');
+        titleSpan.className = 'admin-item-title';
+        titleSpan.textContent = title;
+        const subSpan = document.createElement('span');
+        subSpan.className = 'admin-item-sub';
+        subSpan.textContent = sub;
+        info.append(titleSpan, subSpan);
+        const delBtn = document.createElement('button');
+        delBtn.className = 'admin-del-btn';
+        delBtn.title = 'Sterge';
+        const trash = document.createElement('i');
+        trash.className = 'fa-solid fa-trash';
+        delBtn.appendChild(trash);
+        delBtn.addEventListener('click', onDelete);
+        li.append(info, delBtn);
+        return li;
+    }
     function renderAdminPanel() {
         resolveUserRole(function(role) {
             if (role !== 'admin') { hideAdminPanel(); return; }
@@ -395,7 +537,6 @@ document.addEventListener("DOMContentLoaded", function() {
             if (!adminPanel) { return; }
             adminPanel.hidden = false;
             adminPanel.style.display = '';
-            
             // Incarc postari
             fetch('http://localhost:5000/api/posts')
                 .then(function(r) { return r.json(); })
@@ -403,45 +544,34 @@ document.addEventListener("DOMContentLoaded", function() {
                     const countEl = document.getElementById('admin-posts-count');
                     if (countEl) { countEl.textContent = posts.length; }
                     if (!adminList) { return; }
-                    adminList.innerHTML = '';
+                    adminList.replaceChildren();
                     for (let i = 0; i < Math.min(posts.length, 20); i++) {
                         const p = posts[i];
-                        const li = document.createElement('li');
-                        li.className = 'admin-list-item';
                         const pTitle = p.title || 'Fara titlu';
                         const pUser  = p.user && p.user.username ? p.user.username : 'Utilizator';
-                        li.innerHTML =
-                            '<span class="admin-item-info"><span class="admin-item-title">' + pTitle + '</span>' +
-                            '<span class="admin-item-sub">' + pUser + '</span></span>' +
-                            '<button class="admin-del-btn" title="Sterge postarea" data-postid="' + p._id + '">' +
-                            '<i class="fa-solid fa-trash"></i></button>';
-                        (function(postId) {
-                            const delBtn = li.querySelector('.admin-del-btn');
-                            delBtn.addEventListener('click', function() {
-                                if (!confirm('Stergi postarea?')) { return; }
-                                fetch('http://localhost:5000/api/posts/' + postId, {
-                                    method: 'DELETE',
-                                    headers: { 'Content-Type': 'application/json' },
-                                    body: JSON.stringify({ userId: currentUser.id, isAdmin: true })
-                                }).then(function(r) {
-                                    if (r.ok) {
-                                        li.remove();
-                                        if (window.postsArray) {
-                                            window.postsArray = window.postsArray.filter(function(x) { return String(x._id) !== postId; });
-                                        }
-                                        const fc = document.getElementById('feed-container');
-                                        if (fc) {
-                                            const card = fc.querySelector('[data-post-id="' + postId + '"]');
-                                            if (card) { card.remove(); }
-                                        }
-                                    } else { alert('Eroare la stergere.'); }
-                                }).catch(function() { alert('Eroare la stergere.'); });
-                            });
-                        })(String(p._id));
+                        const li = adminRow(pTitle, pUser, function() {
+                            if (!confirm('Stergi postarea?')) { return; }
+                            fetch('http://localhost:5000/api/posts/' + p._id, {
+                                method: 'DELETE',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ userId: currentUser.id, isAdmin: true })
+                            }).then(function(r) {
+                                if (r.ok) {
+                                    li.remove();
+                                    if (window.postsArray) {
+                                        window.postsArray = window.postsArray.filter(function(x) { return String(x._id) !== String(p._id); });
+                                    }
+                                    const fc = document.getElementById('feed-container');
+                                    if (fc) {
+                                        const card = fc.querySelector('[data-id="' + p._id + '"]');
+                                        if (card) { card.remove(); }
+                                    }
+                                } else { alert('Eroare la stergere.'); }
+                            }).catch(function() { alert('Eroare la stergere.'); });
+                        });
                         adminList.appendChild(li);
                     }
                 }).catch(function() {});
-                
             // Incarc utilizatori
             fetch('http://localhost:5000/api/auth/users')
                 .then(function(r) { return r.json(); })
@@ -449,32 +579,20 @@ document.addEventListener("DOMContentLoaded", function() {
                     const countEl2 = document.getElementById('admin-users-count');
                     if (countEl2) { countEl2.textContent = users.length; }
                     if (!adminUsersList) { return; }
-                    adminUsersList.innerHTML = '';
+                    adminUsersList.replaceChildren();
                     for (let j = 0; j < users.length; j++) {
                         const u = users[j];
-                        const li2 = document.createElement('li');
-                        li2.className = 'admin-list-item';
-                        const uRole = u.role || 'user';
-                        const uEmail = u.email || '';
-                        li2.innerHTML =
-                            '<span class="admin-item-info"><span class="admin-item-title">' + u.username + '</span>' +
-                            '<span class="admin-item-sub">' + uEmail + ' • ' + uRole + '</span></span>' +
-                            '<button class="admin-del-btn" title="Sterge utilizatorul" data-uid="' + u._id + '">' +
-                            '<i class="fa-solid fa-trash"></i></button>';
-                        (function(uid, uname) {
-                            const delBtn2 = li2.querySelector('.admin-del-btn');
-                            delBtn2.addEventListener('click', function() {
-                                if (!confirm('Stergi utilizatorul ' + uname + '?')) { return; }
-                                fetch('http://localhost:5000/api/auth/user/' + uid, {
-                                    method: 'DELETE',
-                                    headers: { 'Content-Type': 'application/json' },
-                                    body: JSON.stringify({ adminId: currentUser.id })
-                                }).then(function(r) {
-                                    if (r.ok) { li2.remove(); }
-                                    else { alert('Eroare la stergere utilizator.'); }
-                                }).catch(function() { alert('Eroare la stergere utilizator.'); });
-                            });
-                        })(String(u._id), u.username);
+                        const li2 = adminRow(u.username, (u.email || '') + ' • ' + (u.role || 'user'), function() {
+                            if (!confirm('Stergi utilizatorul ' + u.username + '?')) { return; }
+                            fetch('http://localhost:5000/api/auth/user/' + u._id, {
+                                method: 'DELETE',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ adminId: currentUser.id })
+                            }).then(function(r) {
+                                if (r.ok) { li2.remove(); }
+                                else { alert('Eroare la stergere utilizator.'); }
+                            }).catch(function() { alert('Eroare la stergere utilizator.'); });
+                        });
                         adminUsersList.appendChild(li2);
                     }
                 }).catch(function() {});
@@ -482,8 +600,7 @@ document.addEventListener("DOMContentLoaded", function() {
     }
     renderAdminPanel();
 });
-
-// click pe notificare
+// ataseaza click pe un item de notificare
 window.attachNotifClick = function(el, notif) {
     el.style.cursor = 'pointer';
     el.addEventListener('click', async function() {
@@ -495,7 +612,6 @@ window.attachNotifClick = function(el, notif) {
             return;
         }
         if (!postId) { return; }
-        
         // Caut postarea in array-ul global; daca nu e, o iau de la server
         let found = window.postsArray && window.postsArray.find(function(p) { return String(p._id) === postId; });
         if (!found) {
@@ -513,15 +629,14 @@ window.attachNotifClick = function(el, notif) {
         }
     });
 };
-
 // Mobile bottom nav - toggle panouri laterale
 (function() {
-    const btnFeed = document.getElementById('mob-btn-feed');
-    const btnPost = document.getElementById('mob-btn-post');
-    const btnGems = document.getElementById('mob-btn-gems');
-    const btnMsg = document.getElementById('mob-btn-msg');
-    const backdrop = document.getElementById('mobile-panel-backdrop');
-    const leftPanel = document.querySelector('.left-main');
+    const btnFeed    = document.getElementById('mob-btn-feed');
+    const btnPost    = document.getElementById('mob-btn-post');
+    const btnGems    = document.getElementById('mob-btn-gems');
+    const btnMsg     = document.getElementById('mob-btn-msg');
+    const backdrop   = document.getElementById('mobile-panel-backdrop');
+    const leftPanel  = document.querySelector('.left-main');
     const rightPanel = document.querySelector('.right-main');
     if (!btnFeed || !btnGems || !btnMsg) { return; }
 
@@ -537,7 +652,7 @@ window.attachNotifClick = function(el, notif) {
     btnFeed.addEventListener('click', function() {
         closePanels();
     });
-    
+
     if (btnPost) {
         btnPost.addEventListener('click', function() {
             closePanels();
@@ -548,7 +663,7 @@ window.attachNotifClick = function(el, notif) {
             }
         });
     }
-    
+
     btnGems.addEventListener('click', function() {
         const isOpen = leftPanel && leftPanel.classList.contains('mobile-open');
         closePanels();
@@ -559,7 +674,7 @@ window.attachNotifClick = function(el, notif) {
             btnGems.classList.add('active');
         }
     });
-    
+
     btnMsg.addEventListener('click', function() {
         const isOpen = rightPanel && rightPanel.classList.contains('mobile-open');
         closePanels();
@@ -570,7 +685,7 @@ window.attachNotifClick = function(el, notif) {
             btnMsg.classList.add('active');
         }
     });
-    
+
     if (backdrop) {
         backdrop.addEventListener('click', function() {
             closePanels();

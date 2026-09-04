@@ -7,12 +7,12 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <title>Trop It</title>
+    <title>Trip It</title>
 </head>
 <body>
 <header class="main-header">
     <div class="left-header">
-        <div class="name"><h1><a href="index.html">Trop It</a></h1></div>
+        <div class="name"><h1><a href="index.html">Trip It</a></h1></div>
         <form class="search-bar">
             <input type="text" placeholder="Cauta">
         </form>
@@ -34,18 +34,6 @@
             </button>
             <div class="dropdown-menu notifications-menu hidden" id="dropdown-notifications">
                 <h4>Notificări Noi</h4>
-                <div class="notification-item">
-                    <div class="av-wrap av-xs"><i class="fa-solid fa-user"></i></div>
-                    <p><strong>Mihai</strong> ți-a apreciat postarea.</p>
-                </div>
-                <div class="notification-item">
-                    <div class="av-wrap av-xs"><i class="fa-solid fa-user"></i></div>
-                    <p><strong>Elena</strong> a adăugat un comentariu.</p>
-                </div>
-                <div class="notification-item highlight">
-                    <span class="gem-icon">💎</span>
-                    <p>Ai primit 50 Gems la ultima postare!</p>
-                </div>
             </div>
         </div>
         <div class="nav-item dropdown-container">
@@ -56,6 +44,8 @@
             </div>
             <div class="dropdown-menu profile-menu hidden" id="dropdown-profile">
                 <a href="profil.html" class="dropdown-link"><i class="fa-regular fa-user"></i> Profilul meu</a>
+                <a href="#" class="dropdown-link"><i class="fa-solid fa-gear"></i> Setări cont</a>
+                <a href="#" class="dropdown-link"><i class="fa-solid fa-map-location-dot"></i> Traseele mele</a>
                 <div class="dropdown-gems-counter" id="dropdown-gems-counter">
                     <span class="gems-counter-label"><i class="fa-solid fa-gem"></i> Gems luna aceasta</span>
                     <div class="gems-counter-bar">
@@ -77,44 +67,7 @@
             <p style="color:#aaa;text-align:center;font-size:0.85rem;">Se încarcă...</p>
         </div>
     </div>
-    <div id="feed-container" class="mid-main">
-        <div class="post-container">
-            <div class="top-post">
-                <div class="av-wrap"><i class="fa-solid fa-user"></i></div>
-                <div class="card-user-info">
-                    <span class="card-username">Andrei Popescu</span>
-                    <span class="card-location">Transfăgărășan, România</span>
-                </div>
-            </div>
-            <p class="description">Un loc absolut superb, recomand să mergeți dimineața!</p>
-            <img src="https://images.unsplash.com/photo-1519681393784-d120267933ba?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" class="post-image" alt="Postare">
-            <div class="bot-post">
-                <div class="actions">
-                    <button class="action-btn">💎 24 Gems</button> 
-                    <button class="action-btn">❤️ Like</button> 
-                    <button class="action-btn">💬 Comentarii</button>
-                </div>
-            </div>
-        </div>
-        <div class="post-container">
-            <div class="top-post">
-                <div class="av-wrap"><i class="fa-solid fa-user"></i></div>
-                <div class="card-user-info">
-                    <span class="card-username">Andrei Popescu</span>
-                    <span class="card-location">Transfăgărășan, România</span>
-                </div>
-            </div>
-            <p class="description">Un loc absolut superb, recomand să mergeți dimineața!</p>
-            <img src="https://images.unsplash.com/photo-1519681393784-d120267933ba?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" class="post-image" alt="Postare">
-            <div class="bot-post">
-                <div class="actions">
-                    <button class="action-btn">💎 24 Gems</button> 
-                    <button class="action-btn">❤️ Like</button> 
-                    <button class="action-btn">💬 Comentarii</button>
-                </div>
-            </div>
-        </div>
-    </div>
+    <div id="feed-container" class="mid-main"></div>
     <div class="right-main">
         <div class="msg">
             <h3>Mesaje</h3>
@@ -352,6 +305,92 @@
     </button>
 </nav>
 <div class="mobile-panel-backdrop hidden" id="mobile-panel-backdrop"></div>
+<template id="post-card-template">
+    <div class="post-container">
+        <div class="top-post">
+            <div class="av-wrap"><i class="fa-solid fa-user"></i><img class="avatar av-hidden" alt=""></div>
+            <div class="card-user-info">
+                <span class="card-username"></span>
+                <span class="card-location"></span>
+            </div>
+        </div>
+        <p class="description"></p>
+        <div class="feed-media">
+            <button type="button" class="carousel-btn prev-btn hidden">&#10094;</button>
+            <button type="button" class="carousel-btn next-btn hidden">&#10095;</button>
+            <div class="carousel-images"></div>
+            <div class="carousel-dots hidden"></div>
+        </div>
+        <div class="bot-post">
+            <div class="actions">
+                <button type="button" class="action-btn btn-gem">💎 Ofera Gem</button>
+                <button type="button" class="action-btn btn-like">❤️ 0 Like</button>
+                <button type="button" class="action-btn btn-comments">💬 Comentarii / Harta</button>
+            </div>
+        </div>
+    </div>
+</template>
+
+<template id="waypoint-card-template">
+    <div class="waypoint-card">
+        <img class="waypoint-card-img av-hidden" alt="">
+        <div class="waypoint-info">
+            <div class="waypoint-name"></div>
+            <div class="waypoint-desc"></div>
+        </div>
+    </div>
+</template>
+
+<template id="comment-template">
+    <div class="comment-thread">
+        <div class="comment">
+            <div class="av-wrap av-xs"><i class="fa-solid fa-user"></i><img class="avatar-micro av-hidden" alt=""></div>
+            <div class="comment-content">
+                <p><strong class="c-name"></strong> <span class="c-text"></span></p>
+                <div class="comment-actions"><span class="c-time"></span></div>
+            </div>
+        </div>
+    </div>
+</template>
+
+<template id="notif-template">
+    <div class="notif-item notif-new">
+        <div class="av-wrap av-xs"><i class="fa-solid fa-user"></i><img class="avatar-micro av-hidden" alt=""></div>
+        <span class="notif-text"></span>
+    </div>
+</template>
+
+<template id="dm-item-template">
+    <div class="dm-item">
+        <div class="av-wrap"><i class="fa-solid fa-user"></i><img class="avatar av-hidden" alt=""></div>
+        <div class="dm-user-info">
+            <span class="dm-name"></span>
+            <span>Apasa pentru a trimite mesaj</span>
+        </div>
+    </div>
+</template>
+
+<template id="group-card-template">
+    <div class="group-card">
+        <div class="group-header">
+            <span class="g-name"></span>
+            <span class="g-meta"></span>
+        </div>
+        <div class="group-body"></div>
+    </div>
+</template>
+
+<template id="leaderboard-card-template">
+    <a href="#" class="mini-card">
+        <span class="rank"></span>
+        <img class="miniimage" alt="">
+        <div class="scor">
+            <span class="lb-title"></span>
+            <span class="lb-gems"></span>
+        </div>
+    </a>
+</template>
+
 <script src="http://localhost:5000/socket.io/socket.io.js"></script>
 <script src="ui.js" defer></script>
 <script src="map.js" defer></script>

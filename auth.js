@@ -1,15 +1,15 @@
 ﻿document.addEventListener("DOMContentLoaded", function() {
-    const registerForm = document.getElementById("register-form");
-    const loginForm = document.getElementById("login-form");
-    const API_URL = "http://localhost:5000/api/auth";
+    var registerForm = document.getElementById("register-form");
+    var loginForm = document.getElementById("login-form");
+    var API_URL = "http://localhost:5000/api/auth";
     // register
     if (registerForm) {
         registerForm.addEventListener("submit", async function(e) {
             e.preventDefault();
-            const username = registerForm.querySelector('input[name="Username"]').value;
-            const email = registerForm.querySelector('input[name="Email"]').value;
-            const password = registerForm.querySelector('input[name="Parola"]').value;
-            const confirmPassword = registerForm.querySelector('input[name="Confirma parola"]').value;
+            var username = registerForm.querySelector('input[name="Username"]').value;
+            var email = registerForm.querySelector('input[name="Email"]').value;
+            var password = registerForm.querySelector('input[name="Parola"]').value;
+            var confirmPassword = registerForm.querySelector('input[name="Confirma parola"]').value;
             if (password !== confirmPassword) {
                 alert("Parolele nu coincid!");
                 return;
@@ -36,8 +36,8 @@
     if (loginForm) {
         loginForm.addEventListener("submit", async function(e) {
             e.preventDefault();
-            const email = loginForm.querySelector('input[name="email"]').value;
-            const password = loginForm.querySelector('input[name="parola"]').value;
+            var email = loginForm.querySelector('input[name="email"]').value;
+            var password = loginForm.querySelector('input[name="parola"]').value;
             try {
                 var res = await fetch(API_URL + "/login", {
                     method: "POST",

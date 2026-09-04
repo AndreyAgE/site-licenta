@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Profil</title>
+    <title>Profil - Trip It</title>
     <link rel="stylesheet" href="index.css">
     <link rel="stylesheet" href="profil.css"> 
     <link rel="stylesheet" href="full-post.css">
@@ -18,7 +18,7 @@
 <body>
     <header class="main-header">
         <div class="left-header">
-            <div class="name"><h1><a href="index.html">Trop It</a></h1></div>
+            <div class="name"><h1><a href="index.html">Trip It</a></h1></div>
             <form class="search-bar">
                 <input type="text" placeholder="Cauta">
             </form>
@@ -40,18 +40,6 @@
                 </button>
                 <div class="dropdown-menu notifications-menu hidden" id="dropdown-notifications">
                     <h4>Notificări Noi</h4>
-                    <div class="notification-item">
-                        <div class="av-wrap av-xs"><i class="fa-solid fa-user"></i></div>
-                        <p><strong>Mihai</strong> ți-a apreciat postarea.</p>
-                    </div>
-                    <div class="notification-item">
-                        <div class="av-wrap av-xs"><i class="fa-solid fa-user"></i></div>
-                        <p><strong>Elena</strong> a adăugat un comentariu.</p>
-                    </div>
-                    <div class="notification-item highlight">
-                        <span class="gem-icon">💎</span>
-                        <p>Ai primit 50 Gems la ultima postare!</p>
-                    </div>
                 </div>
             </div>
             <div class="nav-item dropdown-container">
@@ -62,6 +50,8 @@
                 </div>
                 <div class="dropdown-menu profile-menu hidden" id="dropdown-profile">
                     <a href="profil.html" class="dropdown-link"><i class="fa-regular fa-user"></i> Profilul meu</a>
+                    <a href="#" class="dropdown-link"><i class="fa-solid fa-gear"></i> Setări cont</a>
+                    <a href="#" class="dropdown-link"><i class="fa-solid fa-map-location-dot"></i> Traseele mele</a>
                     <div class="dropdown-gems-counter" id="dropdown-gems-counter">
                         <span class="gems-counter-label"><i class="fa-solid fa-gem"></i> Gems luna aceasta</span>
                         <div class="gems-counter-bar">
@@ -116,26 +106,7 @@
             </div>
             <div id="user-personal-map" class="profile-inline-map"></div>
         </div>
-        <div class="profile-grid">
-            <div class="grid-item">
-                <img src="https://images.unsplash.com/photo-1519681393784-d120267933ba?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80" alt="Postare 1">
-            </div>
-            <div class="grid-item">
-                <img src="https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80" alt="Postare 2">
-            </div>
-            <div class="grid-item">
-                <img src="https://images.unsplash.com/photo-1454496522488-7a8e488e8606?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80" alt="Postare 3">
-            </div>
-            <div class="grid-item">
-                <img src="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80" alt="Postare 4">
-            </div>
-            <div class="grid-item">
-                <img src="https://images.unsplash.com/photo-1472396961693-142e6e269027?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80" alt="Postare 5">
-            </div>
-            <div class="grid-item">
-                <img src="https://images.unsplash.com/photo-1414016642750-7fdd78dc33d9?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80" alt="Postare 6">
-            </div>
-        </div>
+        <div class="profile-grid"></div>
     </div>
     <div class="modal" id="create-post-modal" hidden>
     <div class="modal-content modal-wide">
@@ -283,5 +254,18 @@
             </div>
         </div>
     </div>
+
+    <template id="notif-template">
+        <div class="notif-item notif-new">
+            <div class="av-wrap av-xs"><i class="fa-solid fa-user"></i><img class="avatar-micro av-hidden" alt=""></div>
+            <span class="notif-text"></span>
+        </div>
+    </template>
+
+    <template id="grid-item-template">
+        <div class="grid-item">
+            <img alt="">
+        </div>
+    </template>
 </body>
 </html>
